@@ -1,7 +1,9 @@
 import { Code2 } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export default function Skills() {
-  const skillsList = ["Java", "HTML", "CSS", "Node.js", "SQL", "Postman"];
+  const { portfolioData } = usePortfolio();
+  const { skillsList } = portfolioData;
 
   return (
     <section id="skills" className="py-24 bg-slate-950 border-t border-white/5 relative overflow-hidden">

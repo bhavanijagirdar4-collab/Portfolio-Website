@@ -8,13 +8,24 @@ import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
 import ResumeView from './components/ResumeView';
-import { PERSONAL_INFO } from './data';
+import { PortfolioProvider, usePortfolio } from './context/PortfolioContext';
+import DynamicSettings from './components/DynamicSettings';
 
 export default function App() {
+  return (
+    <PortfolioProvider>
+      <PortfolioAppInner />
+    </PortfolioProvider>
+  );
+}
+
+function PortfolioAppInner() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [currentHash, setCurrentHash] = useState(window.location.hash);
+  const { portfolioData } = usePortfolio();
+  const { personalInfo } = portfolioData;
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -50,13 +61,13 @@ export default function App() {
     // Generate synthetic placement resume file
     const resumeContent = `
 ========================================
-RESUME SUMMARY: ${PERSONAL_INFO.name.toUpperCase()}
+RESUME SUMMARY: ${personalInfo.name.toUpperCase()}
 ========================================
 Academic Year: B.Tech IV Year (Computer Science Engineering)
-Target Graduation: ${PERSONAL_INFO.graduationYear}
-Cumulative CGPA: ${PERSONAL_INFO.cgpa}
-Email: ${PERSONAL_INFO.email}
-Specialization: Aspiring Software Development Engineer / Full-Stack
+Target Graduation: ${personalInfo.graduationYear}
+Cumulative CGPA: ${personalInfo.cgpa}
+Email: ${personalInfo.email}
+Specialization: ${personalInfo.specialization}
 
 Core Technical Skills:
 - Languages: Java, C++, Python, SQL, JavaScript ES6+
@@ -69,14 +80,14 @@ Featured Projects:
 3. DevLink: Practice coding terminal with automated student test analytics.
 
 Thank you for reviewing my placements resume!
-Contact me directly at: ${PERSONAL_INFO.email}
+Contact me directly at: ${personalInfo.email}
 ========================================
 `;
     const blob = new Blob([resumeContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${PERSONAL_INFO.name.replace(/\s+/g, '_')}_Resume_Summary.txt`;
+    link.download = `${personalInfo.name.replace(/\s+/g, '_')}_Resume_Summary.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -84,7 +95,7 @@ Contact me directly at: ${PERSONAL_INFO.email}
   };
 
   const copyEmailToClipboard = () => {
-    navigator.clipboard.writeText(PERSONAL_INFO.email);
+    navigator.clipboard.writeText(personalInfo.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   };
@@ -116,10 +127,10 @@ Contact me directly at: ${PERSONAL_INFO.email}
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-center md:text-left space-y-1">
               <h3 className="font-sans font-bold text-white text-base">
-                {PERSONAL_INFO.name}
+                {personalInfo.name}
               </h3>
               <p className="text-xs text-slate-400">
-                Full-Stack Developer
+                {personalInfo.title}
               </p>
             </div>
 
@@ -139,7 +150,7 @@ Contact me directly at: ${PERSONAL_INFO.email}
 
           <div className="flex flex-col sm:flex-row items-center justify-between border-t border-white/5 pt-8 gap-4">
             <p className="text-xs text-slate-600">
-              &copy; 2026 Bhavani Jagirdar.
+              &copy; {new Date().getFullYear()} {personalInfo.name}.
             </p>
             <div className="flex items-center gap-2">
             </div>
@@ -147,6 +158,9 @@ Contact me directly at: ${PERSONAL_INFO.email}
 
         </div>
       </footer>
+
+      {/* Embedded Live Customization Panel */}
+      <DynamicSettings />
 
       {/* Back-to-Top Float Toggle button */}
       {showScrollTop && (
@@ -184,13 +198,13 @@ Contact me directly at: ${PERSONAL_INFO.email}
             <div className="p-6 space-y-6 text-left">
               <div className="space-y-2">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  {PERSONAL_INFO.name} <Award size={16} className="text-amber-400" />
+                  {personalInfo.name} <Award size={16} className="text-amber-400" />
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Candidate Education: <strong>{PERSONAL_INFO.university}</strong>
+                  Candidate Education: <strong>{personalInfo.university}</strong>
                 </p>
                 <p className="text-xs text-slate-400">
-                  B.Tech cumulative performance score: <strong className="text-white font-mono">{PERSONAL_INFO.cgpa}</strong> ({PERSONAL_INFO.graduationYear} batch)
+                  B.Tech cumulative performance score: <strong className="text-white font-mono">{personalInfo.cgpa}</strong> ({personalInfo.graduationYear} batch)
                 </p>
               </div>
 

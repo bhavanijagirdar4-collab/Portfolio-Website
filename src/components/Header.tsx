@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Download, Github } from 'lucide-react';
-import { PERSONAL_INFO } from '../data';
+import { Menu, X, Download } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 interface HeaderProps {
   onDownloadResume: () => void;
@@ -9,6 +9,8 @@ interface HeaderProps {
 export default function Header({ onDownloadResume }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { portfolioData } = usePortfolio();
+  const { personalInfo } = portfolioData;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,7 +53,7 @@ export default function Header({ onDownloadResume }: HeaderProps) {
             className="text-xl font-bold font-mono tracking-tight cursor-pointer text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
           >
             <span className="text-white">&lt;</span>
-            {PERSONAL_INFO.nameShort}
+            {personalInfo.nameShort}
             <span className="text-white">.dev /&gt;</span>
           </div>
 

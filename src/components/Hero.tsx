@@ -1,9 +1,10 @@
-import { motion } from 'motion/react';
-import { ArrowRight, Linkedin, Github, ExternalLink, Terminal } from 'lucide-react';
-import { PERSONAL_INFO } from '../data';
+import { usePortfolio } from '../context/PortfolioContext';
 import avatarImg from '../assets/images/developer_avatar_1781419595596.jpg';
 
 export default function Hero() {
+  const { portfolioData } = usePortfolio();
+  const { personalInfo } = portfolioData;
+
   return (
     <section
       id="hero"
@@ -22,7 +23,7 @@ export default function Hero() {
           <div className="relative w-40 h-40 rounded-full overflow-hidden border border-white/20 hover:border-indigo-500/50 transition-all duration-300 shadow-2xl bg-slate-900 group">
             <img
               src={avatarImg}
-              alt={PERSONAL_INFO.name}
+              alt={personalInfo.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               referrerPolicy="no-referrer"
             />
@@ -32,18 +33,18 @@ export default function Hero() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-none">
               Hi, I&apos;m{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-indigo-500">
-                {PERSONAL_INFO.name}
+                {personalInfo.name}
               </span>
             </h1>
             
             {/* The developer role line */}
             <p className="text-lg sm:text-xl md:text-2xl font-mono text-indigo-400 font-semibold tracking-wide">
-              Full-Stack Developer
+              {personalInfo.title}
             </p>
           </div>
 
           <p className="text-base sm:text-lg text-slate-400 leading-relaxed sm:leading-loose md:leading-[2.5rem] max-w-xl">
-            {PERSONAL_INFO.tagline}
+            {personalInfo.tagline}
           </p>
         </div>
       </div>

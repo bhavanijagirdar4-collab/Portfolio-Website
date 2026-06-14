@@ -22,6 +22,11 @@ export const PERSONAL_INFO = {
   }
 };
 
+export const GITHUB_REPO_CONFIG = {
+  username: "bhavanijagirdar4-collab",
+  repo: "Leetcode-Solutions"
+};
+
 export const SKILLS_MATRIX: SkillCategory[] = [
   {
     title: "Programming Languages",
@@ -47,7 +52,7 @@ export const PROJECTS: Project[] = [
     description: "Highly optimized implementations of complex algorithms and data structures using Java. Covers Array manipulation, HashMaps, Two-Pointers, and String processing schemas.",
     extendedDescription: "Utilizes Java's built-in memory management and collections library to construct elegant solutions optimized for runtime complexity (O(N)) and space consumption targets on the LeetCode platform.",
     tags: ["Java", "Data Structures", "Algorithms", "Optimization"],
-    githubUrl: "https://github.com/bhavanijagirdar4-collab/Leetcode-Solutions"
+    githubUrl: `https://github.com/${GITHUB_REPO_CONFIG.username}/${GITHUB_REPO_CONFIG.repo}`
   },
   {
     id: "proj-2",
@@ -55,7 +60,7 @@ export const PROJECTS: Project[] = [
     description: "Mastery of advanced relational database querying and complex database design. Features JOIN optimizations, CTE structures, subqueries, and window functions.",
     extendedDescription: "Solves intermediate-to-hard querying operations, focusing on execution plan safety, indexing techniques, partition manipulation, and standardized relational query structures.",
     tags: ["SQL", "Relational Databases", "Query Design", "Performance Tuning"],
-    githubUrl: "https://github.com/bhavanijagirdar4-collab/Leetcode-Solutions"
+    githubUrl: `https://github.com/${GITHUB_REPO_CONFIG.username}/${GITHUB_REPO_CONFIG.repo}`
   },
   {
     id: "proj-3",
@@ -63,7 +68,7 @@ export const PROJECTS: Project[] = [
     description: "Algorithmic coverage of advanced non-linear structures. Focuses on Binary Search Trees (BST), Graph Traversals (BFS/DFS), and dynamic backtracking paradigms.",
     extendedDescription: "Employs recursive evaluation blocks and stack/queue traversal architectures to process deeply-nested logical structures efficiently without exceeding maximum execution depth limits.",
     tags: ["Java", "BFS & DFS", "Binary Trees", "Recursion & Backtracking"],
-    githubUrl: "https://github.com/bhavanijagirdar4-collab/Leetcode-Solutions"
+    githubUrl: `https://github.com/${GITHUB_REPO_CONFIG.username}/${GITHUB_REPO_CONFIG.repo}`
   }
 ];
 

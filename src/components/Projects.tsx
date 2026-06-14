@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Github, ExternalLink, FolderGit2, Folder, FileCode, RefreshCw, AlertCircle } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 interface RepoItem {
   name: string;
@@ -13,12 +14,14 @@ export default function Projects() {
   const [repoFiles, setRepoFiles] = useState<RepoItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [err, setErr] = useState<string | null>(null);
+  const { portfolioData } = usePortfolio();
+  const { githubConfig } = portfolioData;
 
   const fetchRepoContents = async () => {
     setLoading(true);
     setErr(null);
     try {
-      const response = await fetch('https://api.github.com/repos/bhavanijagirdar4-collab/Leetcode-Solutions/contents');
+      const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents`);
       if (!response.ok) {
         if (response.status === 403) {
           throw new Error('API Rate limit reached. You can view the list of files directly on the GitHub repository.');
@@ -43,7 +46,7 @@ export default function Projects() {
 
   useEffect(() => {
     fetchRepoContents();
-  }, []);
+  }, [githubConfig.username, githubConfig.repo]);
 
   return (
     <section id="projects" className="py-24 bg-slate-950 border-t border-white/5 relative">
@@ -72,7 +75,7 @@ export default function Projects() {
                 </h4>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-white mt-1">
-                Leetcode-Solutions Explorer
+                {githubConfig.repo} Explorer
               </h3>
             </div>
 
@@ -88,7 +91,7 @@ export default function Projects() {
               </button>
               
               <a
-                href="https://github.com/bhavanijagirdar4-collab/Leetcode-Solutions"
+                href={`https://github.com/${githubConfig.username}/${githubConfig.repo}`}
                 target="_blank"
                 rel="noreferrer"
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/10 active:scale-95"
@@ -112,12 +115,12 @@ export default function Projects() {
               <div className="flex flex-col items-center justify-center py-10 px-4 text-center space-y-3">
                 <AlertCircle className="text-rose-500" size={32} />
                 <div className="space-y-1 max-w-md">
-                  <p className="text-sm font-semibold text-slate-300">Could Not Load Files Automatically</p>
+                   <p className="text-sm font-semibold text-slate-300">Could Not Load Files Automatically</p>
                   <p className="text-xs text-slate-500 leading-normal">{err}</p>
                 </div>
                 <div className="pt-2">
                   <a
-                    href="https://github.com/bhavanijagirdar4-collab/Leetcode-Solutions"
+                    href={`https://github.com/${githubConfig.username}/${githubConfig.repo}`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-semibold rounded-lg transition-all"

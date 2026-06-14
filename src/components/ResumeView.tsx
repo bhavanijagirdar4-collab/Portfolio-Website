@@ -1,9 +1,17 @@
-import { ArrowLeft, Printer, Phone, Mail, Github, MapPin, Globe, ExternalLink } from 'lucide-react';
-import { PERSONAL_INFO, SKILLS_MATRIX, PROJECTS, CERTIFICATIONS, LANGUAGES } from '../data';
+import { ArrowLeft, Printer, Phone, Mail, Github, MapPin } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export default function ResumeView() {
   const handlePrint = () => {
     window.print();
+  };
+
+  const { portfolioData } = usePortfolio();
+  const { personalInfo, skillsList, certifications, languages, education, resumeProjects } = portfolioData;
+
+  // Helper to get raw domain label from github URL
+  const cleanGitHubUrl = (url: string) => {
+    return url.replace(/^https?:\/\/(www\.)?/, '');
   };
 
   return (
@@ -34,33 +42,33 @@ export default function ResumeView() {
       </div>
 
       {/* Main A4 Styled Sheet */}
-      <div className="max-w-[850px] mx-auto bg-white border border-neutral-200 shadow-2xl p-8 sm:p-12 md:p-16 rounded-sm min-h-[1100px] print:shadow-none print:border-none print:p-0">
+      <div className="max-w-[850px] mx-auto bg-white border border-neutral-200 shadow-2xl p-8 sm:p-12 md:p-16 rounded-sm min-h-[1100px] print:shadow-none print:border-none print:p-0 text-left">
         
         {/* Name Header Section */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-950 uppercase">
-            {PERSONAL_INFO.name}
+            {personalInfo.name}
           </h1>
           <p className="text-xs sm:text-sm text-neutral-600 tracking-wide font-medium flex flex-wrap justify-center items-center gap-2">
             <span className="flex items-center gap-1">
               <MapPin size={12} className="text-neutral-500" />
-              {PERSONAL_INFO.location}
+              {personalInfo.location}
             </span>
           </p>
           <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1.5 text-xs text-neutral-600 font-medium">
-            <a href={`mailto:${PERSONAL_INFO.email}`} className="hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <a href={`mailto:${personalInfo.email}`} className="hover:text-indigo-600 transition-colors flex items-center gap-1">
               <Mail size={12} />
-              {PERSONAL_INFO.email}
+              {personalInfo.email}
             </a>
             <span className="text-neutral-300 hidden sm:inline">|</span>
             <span className="flex items-center gap-1">
               <Phone size={12} />
-              {PERSONAL_INFO.phone}
+              {personalInfo.phone}
             </span>
             <span className="text-neutral-300 hidden sm:inline">|</span>
-            <a href={PERSONAL_INFO.socials.github} target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <a href={personalInfo.socials.github} target="_blank" rel="noreferrer" className="hover:text-indigo-600 transition-colors flex items-center gap-1">
               <Github size={12} />
-              github.com/bhavanijagirdar4-collab
+              {cleanGitHubUrl(personalInfo.socials.github)}
             </a>
           </div>
         </div>
@@ -74,7 +82,7 @@ export default function ResumeView() {
             <span>Career Objective</span>
           </h2>
           <p className="text-xs text-neutral-700 leading-relaxed text-justify">
-            Looking for an opportunity to work with an organization where I can enhance my skills, expand my knowledge, and contribute to organizational growth while achieving my full potential.
+            {personalInfo.bio}
           </p>
         </div>
 
@@ -85,38 +93,17 @@ export default function ResumeView() {
           </h2>
 
           <div className="space-y-4">
-            {/* B.Tech */}
-            <div className="flex items-start justify-between text-xs">
-              <div className="space-y-1">
-                <h3 className="font-bold text-neutral-950">Bachelor of Computer Science and Engineering</h3>
-                <p className="text-neutral-600">Srinivasa Ramanujan Institute of Technology, Anantapur.</p>
+            {education.map((item) => (
+              <div key={item.id} className="flex items-start justify-between text-xs pt-1">
+                <div className="space-y-1">
+                  <h3 className="font-bold text-neutral-950">{item.degree} {item.field && `(${item.field})`}</h3>
+                  <p className="text-neutral-600">{item.school}</p>
+                </div>
+                <div className="text-right shrink-0 font-semibold text-neutral-900">
+                  {item.gradeLabel}: {item.gradeValue} | {item.period}
+                </div>
               </div>
-              <div className="text-right shrink-0 font-semibold text-neutral-900">
-                CGPA: 9.2 | 2027
-              </div>
-            </div>
-
-            {/* Intermediate */}
-            <div className="flex items-start justify-between text-xs pt-1">
-              <div className="space-y-1">
-                <h3 className="font-bold text-neutral-950">Intermediate (12th)</h3>
-                <p className="text-neutral-600">J.C.N.R.M Junior College, Anantapur.</p>
-              </div>
-              <div className="text-right shrink-0 font-semibold text-neutral-900">
-                98.5% | 2023
-              </div>
-            </div>
-
-            {/* SSC */}
-            <div className="flex items-start justify-between text-xs pt-1">
-              <div className="space-y-1">
-                <h3 className="font-bold text-neutral-950">SSC (10th)</h3>
-                <p className="text-neutral-600">St. Francis Grammar High School, Hyderabad.</p>
-              </div>
-              <div className="text-right shrink-0 font-semibold text-neutral-900">
-                CGPA: 10 | 2021
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -126,20 +113,10 @@ export default function ResumeView() {
             Technical Skills
           </h2>
 
-          <ul className="space-y-1.5 text-xs text-neutral-700">
-            <li className="flex items-baseline gap-2">
-              <span className="font-bold text-neutral-950 shrink-0 w-44">&#8226; Programming Languages:</span>
-              <span>Java</span>
-            </li>
-            <li className="flex items-baseline gap-2">
-              <span className="font-bold text-neutral-950 shrink-0 w-44">&#8226; Web Technologies:</span>
-              <span>HTML, CSS, JavaScript, Node.js</span>
-            </li>
-            <li className="flex items-baseline gap-2">
-              <span className="font-bold text-neutral-950 shrink-0 w-44">&#8226; Tools &amp; Platforms:</span>
-              <span>Postman, VS Code</span>
-            </li>
-          </ul>
+          <div className="text-xs text-neutral-700 leading-relaxed flex items-baseline gap-1.5">
+            <span className="font-bold text-neutral-900 shrink-0 w-36">&#8226; Skills &amp; Competencies:</span>
+            <span>{skillsList.join(', ')}</span>
+          </div>
         </div>
 
         {/* Projects Section */}
@@ -149,44 +126,24 @@ export default function ResumeView() {
           </h2>
 
           <div className="space-y-5">
-            {/* Project 1 */}
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between text-xs">
-                <h3 className="font-bold text-neutral-950">
-                  DocSpot – Doctor Appointment Booking System
-                </h3>
-                <span className="font-semibold text-neutral-600">May 2025 – July 2025</span>
+            {resumeProjects.map((proj) => (
+              <div key={proj.id} className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between text-xs">
+                  <h3 className="font-bold text-neutral-950">
+                    {proj.title}
+                  </h3>
+                  <span className="font-semibold text-neutral-600">{proj.period}</span>
+                </div>
+                <ul className="list-disc pl-5 space-y-1 text-xs text-neutral-700">
+                  {proj.bulletPoints.map((bullet, idx) => (
+                    <li key={idx}>{bullet}</li>
+                  ))}
+                </ul>
+                <div className="text-xs text-neutral-600 pl-1">
+                  <strong className="text-neutral-900 font-bold">Tech Stack:</strong> {proj.techStack}
+                </div>
               </div>
-              <ul className="list-disc pl-5 space-y-1 text-xs text-neutral-700">
-                <li>Built a web application for booking doctor appointments with three user roles: Admin, Doctor, and Patient.</li>
-                <li>Developed features such as doctor listing, appointment booking, login/signup, and appointment management.</li>
-                <li>Implemented role-based authentication and authorization for secure access.</li>
-                <li>Designed MongoDB collections to store users, doctors, and appointment data.</li>
-                <li>Used GitHub for version control and collaborative project management.</li>
-              </ul>
-              <div className="text-xs text-neutral-600 pl-1">
-                <strong className="text-neutral-900 font-bold">Tech Stack:</strong> HTML, CSS, JavaScript, React, Node.js, MongoDB
-              </div>
-            </div>
-
-            {/* Project 2 */}
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between text-xs">
-                <h3 className="font-bold text-neutral-950">
-                  College Event Handling System
-                </h3>
-                <span className="font-semibold text-neutral-600">Oct 2025 – Dec 2025</span>
-              </div>
-              <ul className="list-disc pl-5 space-y-1 text-xs text-neutral-700">
-                <li>Developed a web application to manage college events and student registrations.</li>
-                <li>Implemented features for event creation, participant registration, and event management.</li>
-                <li>Automated the registration process to reduce manual work.</li>
-                <li>Used GitHub for version control and collaborative project management.</li>
-              </ul>
-              <div className="text-xs text-neutral-600 pl-1">
-                <strong className="text-neutral-900 font-bold">Tech Stack:</strong> HTML, CSS, JavaScript, React, Node.js, MongoDB
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -196,8 +153,8 @@ export default function ResumeView() {
             Certifications
           </h2>
           <ul className="list-disc pl-5 space-y-1 text-xs text-neutral-700">
-            {CERTIFICATIONS.map((cert) => (
-              <li key={cert.title}>
+            {certifications.map((cert, idx) => (
+              <li key={idx}>
                 <span className="font-semibold text-neutral-900">{cert.title}</span> | {cert.year}
               </li>
             ))}
@@ -210,8 +167,8 @@ export default function ResumeView() {
             Languages
           </h2>
           <ul className="list-disc pl-5 space-y-1 text-xs text-neutral-700">
-            {LANGUAGES.map((lang) => (
-              <li key={lang}>{lang}</li>
+            {languages.map((lang, idx) => (
+              <li key={idx}>{lang}</li>
             ))}
           </ul>
         </div>
