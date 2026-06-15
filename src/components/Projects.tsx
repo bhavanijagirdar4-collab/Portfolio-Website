@@ -1,52 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Github, ExternalLink, FolderGit2, Folder, FileCode, RefreshCw, AlertCircle } from 'lucide-react';
+import { Code, ExternalLink, FolderGit2, Calendar, Terminal, Github } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 
-interface RepoItem {
-  name: string;
-  type: string;
-  path: string;
-  html_url: string;
-  size: number;
-}
-
 export default function Projects() {
-  const [repoFiles, setRepoFiles] = useState<RepoItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [err, setErr] = useState<string | null>(null);
   const { portfolioData } = usePortfolio();
-  const { githubConfig } = portfolioData;
-
-  const fetchRepoContents = async () => {
-    setLoading(true);
-    setErr(null);
-    try {
-      const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents`);
-      if (!response.ok) {
-        if (response.status === 403) {
-          throw new Error('API Rate limit reached. You can view the list of files directly on the GitHub repository.');
-        }
-        throw new Error(`Failed to load repository files (Status: ${response.status})`);
-      }
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        // Sort directories first, then files
-        const sorted = data.sort((a, b) => {
-          if (a.type === b.type) return a.name.localeCompare(b.name);
-          return a.type === 'dir' ? -1 : 1;
-        });
-        setRepoFiles(sorted);
-      }
-    } catch (e: any) {
-      setErr(e.message || 'An error occurred while fetching files.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRepoContents();
-  }, [githubConfig.username, githubConfig.repo]);
+  const { githubRepos = [], personalInfo } = portfolioData;
 
   return (
     <section id="projects" className="py-24 bg-slate-950 border-t border-white/5 relative">
@@ -55,119 +12,99 @@ export default function Projects() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-left mb-12">
+        <div className="mb-8 text-left">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight flex items-center gap-3">
             <FolderGit2 className="text-indigo-400" size={32} />
             Projects
           </h2>
         </div>
 
-        {/* Live Explorer Block */}
-        <div className="bg-slate-900/60 border border-white/10 rounded-3xl p-6 sm:p-8 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/5">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <h4 className="text-xs font-mono text-indigo-400 uppercase tracking-widest font-bold">
-                  Live Repository Integration
-                </h4>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white mt-1">
-                {githubConfig.repo} Explorer
-              </h3>
+        {/* Projects Cards Layout */}
+        {githubRepos.length === 0 ? (
+          <div className="bg-slate-900/40 border border-dashed border-white/10 rounded-3xl p-12 text-center max-w-lg mx-auto space-y-4">
+            <Code className="text-slate-500 mx-auto" size={36} />
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-slate-300">No Project Cards Added</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Add projects dynamically using the <strong>Projects</strong> tab in the <strong>Portfolio Customizer</strong> workspace.
+              </p>
             </div>
-
-            <div className="flex items-center gap-2.5">
-              <button
-                onClick={fetchRepoContents}
-                disabled={loading}
-                className="p-2 bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-indigo-400 hover:text-indigo-300 border border-white/10 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 text-xs font-mono"
-                title="Sync Repository State"
-              >
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                Sync List
-              </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {githubRepos.map((project, idx) => {
+              // Parse the tech stack into tags
+              const tags = project.techStack
+                ? project.techStack.split(',').map((t) => t.trim()).filter(Boolean)
+                : [];
               
-              <a
-                href={`https://github.com/${githubConfig.username}/${githubConfig.repo}`}
-                target="_blank"
-                rel="noreferrer"
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/10 active:scale-95"
-              >
-                <Github size={14} />
-                Open Repository
-              </a>
-            </div>
-          </div>
+              const repoUrl = `https://github.com/${project.username}/${project.repo}`;
 
-          {/* Directory Tree Listing Container */}
-          <div className="bg-slate-950 rounded-2xl border border-white/5 p-4 min-h-[220px] transition-all relative">
-            {loading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 gap-3 rounded-2xl">
-                <RefreshCw size={24} className="text-indigo-500 animate-spin" />
-                <span className="text-xs font-mono text-slate-400">Loading catalog files...</span>
-              </div>
-            )}
-
-            {!loading && err && (
-              <div className="flex flex-col items-center justify-center py-10 px-4 text-center space-y-3">
-                <AlertCircle className="text-rose-500" size={32} />
-                <div className="space-y-1 max-w-md">
-                   <p className="text-sm font-semibold text-slate-300">Could Not Load Files Automatically</p>
-                  <p className="text-xs text-slate-500 leading-normal">{err}</p>
-                </div>
-                <div className="pt-2">
-                  <a
-                    href={`https://github.com/${githubConfig.username}/${githubConfig.repo}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-semibold rounded-lg transition-all"
-                  >
-                    View Files on GitHub <ExternalLink size={12} />
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {!loading && !err && repoFiles.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-12 text-slate-500 text-xs text-center font-mono">
-                No items fetched from the directory.
-              </div>
-            )}
-
-            {!loading && !err && repoFiles.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {repoFiles.map((file) => (
-                  <a
-                    key={file.path}
-                    href={file.html_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-between p-3 bg-slate-900/40 hover:bg-slate-900 border border-white/5 hover:border-white/10 rounded-xl transition-all group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 pr-2">
-                      <div className="shrink-0">
-                        {file.type === 'dir' ? (
-                          <Folder className="text-amber-400 fill-amber-400/10" size={18} />
-                        ) : (
-                          <FileCode className="text-indigo-400" size={18} />
-                        )}
+              return (
+                <div
+                  key={project.id || idx}
+                  className="bg-slate-900/40 border border-white/10 hover:border-indigo-500/30 rounded-2xl p-5 relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/5 group flex flex-col justify-between text-left"
+                >
+                  {/* Decorative background blur on hover */}
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full blur-3xl pointer-events-none opacity-50 group-hover:opacity-100 transition-all duration-500" />
+                  
+                  <div>
+                    {/* Project Header Indicators */}
+                    {project.period && (
+                      <div className="flex items-center justify-end gap-1 text-[10px] text-slate-500 font-mono mb-3">
+                        <Calendar size={11} className="text-slate-600" />
+                        <span>{project.period}</span>
                       </div>
-                      <span className="text-slate-200 text-xs sm:text-sm font-bold truncate group-hover:text-indigo-400 transition-colors">
-                        {file.name}
-                      </span>
-                    </div>
-                    <ExternalLink size={12} className="text-slate-600 group-hover:text-slate-400 transition-colors shrink-0" />
-                  </a>
-                ))}
-              </div>
-            )}
+                    )}
+
+                    {/* Title */}
+                    <h4 className="text-base font-bold text-white tracking-tight mt-1 group-hover:text-indigo-300 transition-colors">
+                      {project.title || project.repo}
+                    </h4>
+
+                    {/* Tech details */}
+                    {tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {tags.map((tag, tagIdx) => (
+                          <span
+                            key={tagIdx}
+                            className="px-2 py-0.5 bg-slate-950 border border-white/5 rounded text-[10px] font-semibold text-slate-400 group-hover:border-indigo-500/20 group-hover:text-indigo-300/90 transition-colors"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Project Description */}
+                    {project.description && (
+                      <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                        {project.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Actions Area */}
+                  <div className="mt-5 pt-3.5 border-t border-white/5 flex items-center justify-end">
+                    <a
+                      href={repoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600/90 text-white hover:bg-indigo-500 border border-indigo-500/30 rounded-xl text-[10px] font-mono font-bold tracking-wider transition-all shadow-sm hover:shadow-md cursor-pointer active:scale-95"
+                    >
+                      <Github size={12} />
+                      <span>View Repository</span>
+                      <ExternalLink size={10} className="opacity-80" />
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
 
       </div>
     </section>
   );
 }
+

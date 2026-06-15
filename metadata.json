@@ -1,6 +1,6 @@
 {
   "name": "Bhavani Jagirdar Portfolio",
-  "description": "A clean, modern, and minimalist dark-themed software developer portfolio showcasing open-source projects, LeetCode algorithmic solutions, and direct scheduling features.",
+  "description": "An interactive, fully dynamic software engineering portfolio & resume hub featuring a live in-app customization engine, real-time GitHub API repository explorer, and elegant ATS-friendly print exports.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

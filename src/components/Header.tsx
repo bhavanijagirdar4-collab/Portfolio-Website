@@ -2,11 +2,7 @@ import { useState, useEffect } from 'react';
 import { Menu, X, Download } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 
-interface HeaderProps {
-  onDownloadResume: () => void;
-}
-
-export default function Header({ onDownloadResume }: HeaderProps) {
+export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { portfolioData } = usePortfolio();
@@ -70,30 +66,8 @@ export default function Header({ onDownloadResume }: HeaderProps) {
             ))}
           </div>
 
-          {/* Styled Resume CTA Button */}
-          <div className="hidden md:flex items-center gap-4">
-            <a
-              href="#resume"
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2 text-sm font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/30 hover:bg-indigo-500/20 hover:border-indigo-400 rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-sm"
-            >
-              <Download size={14} />
-              Resume
-            </a>
-          </div>
-
           {/* Mobile Menu Trigger */}
           <div className="flex items-center md:hidden gap-3">
-            <a
-              href="#resume"
-              target="_blank"
-              rel="noreferrer"
-              className="p-2 text-indigo-400 bg-indigo-500/10 rounded-lg border border-indigo-500/20 hover:bg-indigo-500/20 transition-all"
-              title="View Resume"
-            >
-              <Download size={15} />
-            </a>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="text-slate-300 hover:text-white p-2 focus:outline-none transition-colors"

@@ -18,6 +18,16 @@ export interface ResumeProject {
   techStack: string;
 }
 
+export interface GitHubRepoItem {
+  id: string;
+  username: string;
+  repo: string;
+  title?: string;
+  period?: string;
+  techStack?: string;
+  description?: string;
+}
+
 export interface PortfolioData {
   personalInfo: {
     name: string;
@@ -39,10 +49,7 @@ export interface PortfolioData {
       leetcode: string;
     };
   };
-  githubConfig: {
-    username: string;
-    repo: string;
-  };
+  githubRepos: GitHubRepoItem[];
   skillsList: string[];
   certifications: { title: string; year: string }[];
   languages: string[];
@@ -71,10 +78,26 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       leetcode: "https://leetcode.com"
     }
   },
-  githubConfig: {
-    username: "bhavanijagirdar4-collab",
-    repo: "Leetcode-Solutions"
-  },
+  githubRepos: [
+    {
+      id: "repo-1",
+      username: "bhavanijagirdar4-collab",
+      repo: "Leetcode-Solutions",
+      title: "LeetCode Solutions Repository",
+      period: "Jan 2024 - Present",
+      techStack: "Java, JavaScript, Algorithm Design",
+      description: "A highly organized repository containing optimal solutions to complex algorithmic problems from LeetCode. Demonstrates standard data structures, efficient runtime mechanics, and clean code principles."
+    },
+    {
+      id: "repo-2",
+      username: "bhavanijagirdar4-collab",
+      repo: "DocSpot",
+      title: "DocSpot Booking Software",
+      period: "May 2025 – July 2025",
+      techStack: "React, Node.js, Express, MongoDB",
+      description: "A dynamic web application hosting roles for patient login, appointment booking, admin system tracking, and direct consultation requests."
+    }
+  ],
   skillsList: ["Java", "HTML", "CSS", "Node.js", "SQL", "Postman", "React", "MongoDB", "JavaScript"],
   certifications: [
     { title: "APSCHE – Full Stack Development (MERN)", year: "2025" },
@@ -157,7 +180,21 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (stored) {
         const parsed = JSON.parse(stored);
         // Deep-merge or check basic structure
-        if (parsed && parsed.personalInfo && parsed.githubConfig) {
+        if (parsed && parsed.personalInfo) {
+          // Backward compatibility check for transitioning from simple key to full list
+          if (!parsed.githubRepos && parsed.githubConfig) {
+            parsed.githubRepos = [
+              {
+                id: 'repo-default',
+                username: parsed.githubConfig.username || "bhavanijagirdar4-collab",
+                repo: parsed.githubConfig.repo || "Leetcode-Solutions"
+              }
+            ];
+            delete parsed.githubConfig;
+          }
+          if (!parsed.githubRepos || parsed.githubRepos.length === 0) {
+            parsed.githubRepos = DEFAULT_PORTFOLIO_DATA.githubRepos;
+          }
           setPortfolioData(parsed);
         }
       }

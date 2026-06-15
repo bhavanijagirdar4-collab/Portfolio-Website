@@ -8,7 +8,7 @@ import {
 
 export default function DynamicSettings() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'github' | 'skills' | 'education' | 'resume'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'projects' | 'skills' | 'education'>('profile');
   const { portfolioData, updatePortfolioData, resetPortfolioData } = usePortfolio();
 
   // Local working state initialized from context when drawer opens
@@ -17,6 +17,14 @@ export default function DynamicSettings() {
   const [newCertTitle, setNewCertTitle] = useState('');
   const [newCertYear, setNewCertYear] = useState('');
   const [newLang, setNewLang] = useState('');
+
+  // Proj/Repo state inputs
+  const [newProjUser, setNewProjUser] = useState('');
+  const [newProjRepo, setNewProjRepo] = useState('');
+  const [newProjTitle, setNewProjTitle] = useState('');
+  const [newProjPeriod, setNewProjPeriod] = useState('');
+  const [newProjTech, setNewProjTech] = useState('');
+  const [newProjDesc, setNewProjDesc] = useState('');
 
   // Suffix/prefix helpers
   const handleOpen = () => {
@@ -60,13 +68,36 @@ export default function DynamicSettings() {
     }));
   };
 
-  const updateGitHubConfig = (key: string, value: string) => {
+  const addProjectCard = () => {
+    if (newProjUser.trim() && newProjRepo.trim()) {
+      setLocalData(prev => ({
+        ...prev,
+        githubRepos: [
+          ...(prev.githubRepos || []),
+          {
+            id: `repo-${Date.now()}`,
+            username: newProjUser.trim(),
+            repo: newProjRepo.trim(),
+            title: newProjTitle.trim() || newProjRepo.trim(),
+            period: newProjPeriod.trim() || 'Ongoing',
+            techStack: newProjTech.trim() || 'Java, React, SQL',
+            description: newProjDesc.trim() || 'A personal development repository.'
+          }
+        ]
+      }));
+      setNewProjUser('');
+      setNewProjRepo('');
+      setNewProjTitle('');
+      setNewProjPeriod('');
+      setNewProjTech('');
+      setNewProjDesc('');
+    }
+  };
+
+  const removeProjectCard = (id: string) => {
     setLocalData(prev => ({
       ...prev,
-      githubConfig: {
-        ...prev.githubConfig,
-        [key]: value
-      }
+      githubRepos: (prev.githubRepos || []).filter(item => item.id !== id)
     }));
   };
 
@@ -217,10 +248,10 @@ export default function DynamicSettings() {
                 Profile
               </button>
               <button
-                onClick={() => setActiveTab('github')}
-                className={`flex-1 py-3 text-center border-b-2 hover:text-white transition-colors ${activeTab === 'github' ? 'border-indigo-500 text-indigo-400 bg-white/5' : 'border-transparent text-slate-400'}`}
+                onClick={() => setActiveTab('projects')}
+                className={`flex-1 py-3 text-center border-b-2 hover:text-white transition-colors ${activeTab === 'projects' ? 'border-indigo-500 text-indigo-400 bg-white/5' : 'border-transparent text-slate-400'}`}
               >
-                GitHub Config
+                Projects
               </button>
               <button
                 onClick={() => setActiveTab('skills')}
@@ -234,12 +265,7 @@ export default function DynamicSettings() {
               >
                 Academic
               </button>
-              <button
-                onClick={() => setActiveTab('resume')}
-                className={`flex-1 py-3 text-center border-b-2 hover:text-white transition-colors ${activeTab === 'resume' ? 'border-indigo-500 text-indigo-400 bg-white/5' : 'border-transparent text-slate-400'}`}
-              >
-                Resume
-              </button>
+
             </div>
 
             {/* Drawer working forms - scrollable area */}
@@ -383,36 +409,165 @@ export default function DynamicSettings() {
                 </div>
               )}
 
-              {/* GitHub Integration tab */}
-              {activeTab === 'github' && (
+              {/* Projects Tab */}
+              {activeTab === 'projects' && (
                 <div className="space-y-5 animate-fade-in text-left">
                   <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-indigo-400 uppercase tracking-widest border-b border-white/5 pb-2 mb-3">
                     <Github size={13} />
-                    <span>Live Repository Integration</span>
+                    <span>Project Card Customizer</span>
                   </div>
 
                   <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-xs text-indigo-300 leading-relaxed">
-                    <strong className="text-white">API Integration Action Note:</strong> Whenever you modify these values and click <strong>&quot;Apply Changes&quot;</strong>, the main project component will instantly request the layout, tree, files, and file attributes directly from the live public GitHub repository API!
+                    <strong className="text-white">Active Customizing Console:</strong> Add your GitHub repositories below. Each repository will be instantly presented on the home screen as a handsome project card featuring a direct link to the source repository.
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1 font-mono">GitHub Username</label>
-                    <input 
-                      type="text" 
-                      value={localData.githubConfig.username} 
-                      onChange={(e) => updateGitHubConfig('username', e.target.value)}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
-                    />
+                  {/* Add New Project Card Form */}
+                  <div className="p-4 bg-slate-950 border border-white/5 rounded-2xl space-y-4">
+                    <span className="block text-xs font-bold font-mono tracking-wider text-slate-400 uppercase">
+                      Add New Project Card
+                    </span>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                          GitHub Username *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. bhavanijagirdar4-collab"
+                          value={newProjUser}
+                          onChange={(e) => setNewProjUser(e.target.value)}
+                          className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                          Repository Name *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. DocSpot"
+                          value={newProjRepo}
+                          onChange={(e) => setNewProjRepo(e.target.value)}
+                          className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                          Card Title
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. DocSpot Portal"
+                          value={newProjTitle}
+                          onChange={(e) => setNewProjTitle(e.target.value)}
+                          className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                          Period
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Jan - Mar 2025"
+                          value={newProjPeriod}
+                          onChange={(e) => setNewProjPeriod(e.target.value)}
+                          className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                        Technologies Used
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. React, Node.js, Express, MongoDB"
+                        value={newProjTech}
+                        onChange={(e) => setNewProjTech(e.target.value)}
+                        className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                        Project Description
+                      </label>
+                      <textarea
+                        rows={2}
+                        placeholder="Detail the core features and accomplishments of this project."
+                        value={newProjDesc}
+                        onChange={(e) => setNewProjDesc(e.target.value)}
+                        className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                      />
+                    </div>
+
+                    <button
+                      onClick={addProjectCard}
+                      className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl text-xs uppercase flex items-center justify-center gap-1.5 transition-all text-white outline-none cursor-pointer"
+                    >
+                      <Plus size={14} /> Add Project Card
+                    </button>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1 font-mono">GitHub Explore Repository</label>
-                    <input 
-                      type="text" 
-                      value={localData.githubConfig.repo} 
-                      onChange={(e) => updateGitHubConfig('repo', e.target.value)}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
-                    />
+                  {/* Display list of active projects with deletes */}
+                  <div className="space-y-3 pt-2">
+                    <span className="block text-xs font-bold font-mono tracking-wider text-slate-400 uppercase">
+                      Current Project Cards
+                    </span>
+
+                    {(localData.githubRepos || []).length === 0 ? (
+                      <div className="text-center py-6 text-slate-500 font-mono text-xs border border-dashed border-white/10 rounded-xl">
+                        No active project cards. Add your GitHub repository above!
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {(localData.githubRepos || []).map((repoItem) => (
+                          <div
+                            key={repoItem.id}
+                            className="p-4 bg-slate-950 border border-white/5 rounded-2xl relative"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="space-y-1">
+                                <h4 className="text-sm font-bold text-white">
+                                  {repoItem.title || repoItem.repo}
+                                </h4>
+                                <p className="text-[10px] font-mono text-indigo-400">
+                                  {repoItem.username} / {repoItem.repo}
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => removeProjectCard(repoItem.id)}
+                                className="p-1.5 rounded-lg bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/10 hover:border-rose-500/20 text-rose-400 transition-colors cursor-pointer shrink-0"
+                                title="Delete Project Card"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                            
+                            {repoItem.description && (
+                              <p className="text-xs text-slate-400 mt-2 line-clamp-2">
+                                {repoItem.description}
+                              </p>
+                            )}
+                            
+                            {(repoItem.techStack || repoItem.period) && (
+                              <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2 border-t border-white/5 text-[10px] font-mono text-slate-500">
+                                <span className="truncate max-w-[200px]">{repoItem.techStack}</span>
+                                <span>{repoItem.period}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -590,137 +745,7 @@ export default function DynamicSettings() {
                 </div>
               )}
 
-              {/* Resume & Custom Projects Tab */}
-              {activeTab === 'resume' && (
-                <div className="space-y-6 animate-fade-in text-left">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
-                    <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-indigo-400 uppercase tracking-widest">
-                      <Award size={13} />
-                      <span>Resume Projects &amp; Certs</span>
-                    </div>
-                  </div>
 
-                  {/* Certifications configure details */}
-                  <div className="p-4 bg-slate-950 border border-white/5 rounded-2xl space-y-3">
-                    <span className="block text-xs font-bold font-mono tracking-wider text-slate-400 uppercase">Certifications</span>
-                    
-                    <div className="grid grid-cols-3 gap-2">
-                      <input 
-                        type="text"
-                        placeholder="Certificate Title..."
-                        value={newCertTitle}
-                        onChange={(e) => setNewCertTitle(e.target.value)}
-                        className="col-span-2 bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                      />
-                      <input 
-                        type="text"
-                        placeholder="Year..."
-                        value={newCertYear}
-                        onChange={(e) => setNewCertYear(e.target.value)}
-                        className="col-span-1 bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
-                      />
-                    </div>
-                    <button
-                      onClick={addCert}
-                      className="w-full py-1.5 bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30 font-semibold border border-indigo-500/30 rounded-xl text-xs uppercase flex items-center justify-center gap-1 transition-all"
-                    >
-                      <Plus size={13} /> Add Certification
-                    </button>
-
-                    <div className="divide-y divide-white/5 pt-2">
-                      {localData.certifications.map((cert, index) => (
-                        <div key={index} className="flex items-center justify-between py-1.5 text-xs">
-                          <span className="text-slate-300 font-medium truncate pr-2">
-                            {cert.title} <span className="text-slate-500 font-mono">({cert.year})</span>
-                          </span>
-                          <button 
-                            onClick={() => removeCert(index)}
-                            className="text-rose-400 hover:text-rose-300 p-1 rounded cursor-pointer shrink-0"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Resume specific projects list */}
-                  <div className="space-y-4">
-                    <span className="block text-xs font-bold font-mono tracking-wider text-slate-400 uppercase pt-2">Projects Shown on Resume Sheet</span>
-
-                    {localData.resumeProjects.map((proj) => (
-                      <div 
-                        key={proj.id}
-                        className="p-4 bg-slate-950 border border-white/5 rounded-2xl space-y-4"
-                      >
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="col-span-2">
-                            <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">Project Title</label>
-                            <input 
-                              type="text" 
-                              value={proj.title} 
-                              onChange={(e) => updateResumeProject(proj.id, 'title', e.target.value)}
-                              className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">Period</label>
-                            <input 
-                              type="text" 
-                              value={proj.period} 
-                              onChange={(e) => updateResumeProject(proj.id, 'period', e.target.value)}
-                              className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">Technologies Stack Used</label>
-                          <input 
-                            type="text" 
-                            value={proj.techStack} 
-                            onChange={(e) => updateResumeProject(proj.id, 'techStack', e.target.value)}
-                            className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <label className="block text-[10px] font-bold text-slate-500 font-mono uppercase">Bullet descriptions</label>
-                            <button
-                              onClick={() => addResumeProjectBullet(proj.id)}
-                              className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5"
-                            >
-                              <Plus size={10} /> Add bullet
-                            </button>
-                          </div>
-
-                          <div className="space-y-2">
-                            {proj.bulletPoints.map((bullet, bulletIdx) => (
-                              <div key={bulletIdx} className="flex gap-2 items-start">
-                                <span className="text-slate-500 font-mono text-[10px] pt-2">#{bulletIdx+1}</span>
-                                <textarea 
-                                  rows={2}
-                                  value={bullet} 
-                                  onChange={(e) => updateResumeProjectBullet(proj.id, bulletIdx, e.target.value)}
-                                  className="flex-1 bg-slate-900 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
-                                />
-                                <button 
-                                  onClick={() => removeResumeProjectBullet(proj.id, bulletIdx)}
-                                  className="text-rose-450 hover:text-rose-400 p-1 rounded-md bg-white/5 border border-white/5 hover:border-rose-500/10 transition-colors self-center shrink-0"
-                                  title="Delete Bullet"
-                                >
-                                  <Trash2 size={12} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
             </div>
 
