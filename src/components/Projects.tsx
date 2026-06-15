@@ -1,4 +1,4 @@
-import { Code, ExternalLink, FolderGit2, Calendar, Terminal, Github } from 'lucide-react';
+import { Code, ExternalLink, FolderGit2, Terminal, Github } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 
 export default function Projects() {
@@ -49,14 +49,6 @@ export default function Projects() {
                   <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full blur-3xl pointer-events-none opacity-50 group-hover:opacity-100 transition-all duration-500" />
                   
                   <div>
-                    {/* Project Header Indicators */}
-                    {project.period && (
-                      <div className="flex items-center justify-end gap-1 text-[10px] text-slate-500 font-mono mb-3">
-                        <Calendar size={11} className="text-slate-600" />
-                        <span>{project.period}</span>
-                      </div>
-                    )}
-
                     {/* Title */}
                     <h4 className="text-base font-bold text-white tracking-tight mt-1 group-hover:text-indigo-300 transition-colors">
                       {project.title || project.repo}
