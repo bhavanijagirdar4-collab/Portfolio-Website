@@ -26,6 +26,7 @@ export interface GitHubRepoItem {
   period?: string;
   techStack?: string;
   description?: string;
+  deployedLink?: string;
 }
 
 export interface PortfolioData {
@@ -86,7 +87,8 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       title: "LeetCode Solutions Repository",
       period: "Jan 2024 - Present",
       techStack: "Java, JavaScript, Algorithm Design",
-      description: "A highly organized repository containing optimal solutions to complex algorithmic problems from LeetCode. Demonstrates standard data structures, efficient runtime mechanics, and clean code principles."
+      description: "A highly organized repository containing optimal solutions to complex algorithmic problems from LeetCode. Demonstrates standard data structures, efficient runtime mechanics, and clean code principles.",
+      deployedLink: ""
     },
     {
       id: "repo-2",
@@ -95,7 +97,8 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       title: "DocSpot Booking Software",
       period: "May 2025 – July 2025",
       techStack: "React, Node.js, Express, MongoDB",
-      description: "A dynamic web application hosting roles for patient login, appointment booking, admin system tracking, and direct consultation requests."
+      description: "A dynamic web application hosting roles for patient login, appointment booking, admin system tracking, and direct consultation requests.",
+      deployedLink: "https://docspot-portal.example.com"
     }
   ],
   skillsList: ["Java", "HTML", "CSS", "Node.js", "SQL", "Postman", "React", "MongoDB", "JavaScript"],

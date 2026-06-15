@@ -25,6 +25,7 @@ export default function DynamicSettings() {
   const [newProjPeriod, setNewProjPeriod] = useState('');
   const [newProjTech, setNewProjTech] = useState('');
   const [newProjDesc, setNewProjDesc] = useState('');
+  const [newProjDeployed, setNewProjDeployed] = useState('');
 
   // Suffix/prefix helpers
   const handleOpen = () => {
@@ -81,7 +82,8 @@ export default function DynamicSettings() {
             title: newProjTitle.trim() || newProjRepo.trim(),
             period: newProjPeriod.trim() || 'Ongoing',
             techStack: newProjTech.trim() || 'Java, React, SQL',
-            description: newProjDesc.trim() || 'A personal development repository.'
+            description: newProjDesc.trim() || 'A personal development repository.',
+            deployedLink: newProjDeployed.trim()
           }
         ]
       }));
@@ -91,6 +93,7 @@ export default function DynamicSettings() {
       setNewProjPeriod('');
       setNewProjTech('');
       setNewProjDesc('');
+      setNewProjDeployed('');
     }
   };
 
@@ -98,6 +101,15 @@ export default function DynamicSettings() {
     setLocalData(prev => ({
       ...prev,
       githubRepos: (prev.githubRepos || []).filter(item => item.id !== id)
+    }));
+  };
+
+  const updateProjectCard = (id: string, field: string, value: string) => {
+    setLocalData(prev => ({
+      ...prev,
+      githubRepos: (prev.githubRepos || []).map(item => 
+        item.id === id ? { ...item, [field]: value } : item
+      )
     }));
   };
 
@@ -498,6 +510,19 @@ export default function DynamicSettings() {
 
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                        Deployed Website URL (Link)
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="e.g. https://docspot-portal.vercel.app"
+                        value={newProjDeployed}
+                        onChange={(e) => setNewProjDeployed(e.target.value)}
+                        className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 mb-1 font-mono uppercase">
                         Project Description
                       </label>
                       <textarea
@@ -557,6 +582,19 @@ export default function DynamicSettings() {
                                 {repoItem.description}
                               </p>
                             )}
+
+                            <div className="mt-3">
+                              <label className="block text-[9px] font-bold text-slate-550 mb-1 font-mono uppercase">
+                                Deployed Website URL
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="Paste live website URL (e.g. https://...)"
+                                value={repoItem.deployedLink || ''}
+                                onChange={(e) => updateProjectCard(repoItem.id, 'deployedLink', e.target.value)}
+                                className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1 text-[11px] text-indigo-300 font-mono focus:outline-none transition-all placeholder:text-slate-600"
+                              />
+                            </div>
                             
                             {(repoItem.techStack || repoItem.period) && (
                               <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2 border-t border-white/5 text-[10px] font-mono text-slate-500">

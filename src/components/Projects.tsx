@@ -1,4 +1,4 @@
-import { Code, ExternalLink, FolderGit2, Terminal, Github } from 'lucide-react';
+import { Code, ExternalLink, FolderGit2, Terminal, Github, Globe } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 
 export default function Projects() {
@@ -50,7 +50,7 @@ export default function Projects() {
                   
                   <div>
                     {/* Title */}
-                    <h4 className="text-base font-bold text-white tracking-tight mt-1 group-hover:text-indigo-300 transition-colors">
+                    <h4 className="text-lg sm:text-xl font-bold text-white tracking-tight mt-1 group-hover:text-indigo-300 transition-colors">
                       {project.title || project.repo}
                     </h4>
 
@@ -77,7 +77,7 @@ export default function Projects() {
                   </div>
 
                   {/* Actions Area */}
-                  <div className="mt-5 pt-3.5 border-t border-white/5 flex items-center justify-end">
+                  <div className="mt-5 pt-3.5 border-t border-white/5 flex items-center justify-end gap-2">
                     <a
                       href={repoUrl}
                       target="_blank"
@@ -88,6 +88,19 @@ export default function Projects() {
                       <span>View Repository</span>
                       <ExternalLink size={10} className="opacity-80" />
                     </a>
+
+                    {project.deployedLink && project.deployedLink.trim() && (
+                      <a
+                        href={project.deployedLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600/90 text-white hover:bg-indigo-500 border border-indigo-500/30 rounded-xl text-[10px] font-mono font-bold tracking-wider transition-all shadow-sm hover:shadow-md cursor-pointer active:scale-95"
+                      >
+                        <Globe size={12} />
+                        <span>Website</span>
+                        <ExternalLink size={10} className="opacity-80" />
+                      </a>
+                    )}
                   </div>
                 </div>
               );
