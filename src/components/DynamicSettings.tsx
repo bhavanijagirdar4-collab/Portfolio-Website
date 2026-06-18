@@ -557,33 +557,78 @@ export default function DynamicSettings() {
                         {(localData.githubRepos || []).map((repoItem) => (
                           <div
                             key={repoItem.id}
-                            className="p-4 bg-slate-950 border border-white/5 rounded-2xl relative"
+                            className="p-4 bg-slate-950 border border-white/5 rounded-2xl relative space-y-3 animate-fade-in"
                           >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="space-y-1">
-                                <h4 className="text-sm font-bold text-white">
-                                  {repoItem.title || repoItem.repo}
-                                </h4>
-                                <p className="text-[10px] font-mono text-indigo-400">
-                                  {repoItem.username} / {repoItem.repo}
-                                </p>
-                              </div>
+                            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                              <span className="text-xs font-bold font-mono tracking-wider text-indigo-400 uppercase">
+                                Edit Project Card
+                              </span>
                               <button
                                 onClick={() => removeProjectCard(repoItem.id)}
-                                className="p-1.5 rounded-lg bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/10 hover:border-rose-500/20 text-rose-400 transition-colors cursor-pointer shrink-0"
+                                className="p-1 px-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/30 text-rose-450 hover:text-rose-400 text-[10px] font-mono font-bold uppercase transition-colors cursor-pointer shrink-0"
                                 title="Delete Project Card"
                               >
-                                <Trash2 size={13} />
+                                Delete
                               </button>
                             </div>
-                            
-                            {repoItem.description && (
-                              <p className="text-xs text-slate-400 mt-2 line-clamp-2">
-                                {repoItem.description}
-                              </p>
-                            )}
 
-                            <div className="mt-3">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-[9px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                                  Card Title
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. DocSpot Portal"
+                                  value={repoItem.title || ''}
+                                  onChange={(e) => updateProjectCard(repoItem.id, 'title', e.target.value)}
+                                  className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none transition-all placeholder:text-slate-650"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                                  Period
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Ongoing"
+                                  value={repoItem.period || ''}
+                                  onChange={(e) => updateProjectCard(repoItem.id, 'period', e.target.value)}
+                                  className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none transition-all placeholder:text-slate-650"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-[9px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                                  GitHub Username *
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. bhvn"
+                                  value={repoItem.username || ''}
+                                  onChange={(e) => updateProjectCard(repoItem.id, 'username', e.target.value)}
+                                  className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none transition-all placeholder:text-slate-650"
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                                  Repo Name *
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. DocSpot"
+                                  value={repoItem.repo || ''}
+                                  onChange={(e) => updateProjectCard(repoItem.id, 'repo', e.target.value)}
+                                  className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none transition-all placeholder:text-slate-650"
+                                  required
+                                />
+                              </div>
+                            </div>
+
+                            <div>
                               <label className="block text-[9px] font-bold text-slate-550 mb-1 font-mono uppercase">
                                 Deployed Website URL
                               </label>
@@ -592,16 +637,35 @@ export default function DynamicSettings() {
                                 placeholder="Paste live website URL (e.g. https://...)"
                                 value={repoItem.deployedLink || ''}
                                 onChange={(e) => updateProjectCard(repoItem.id, 'deployedLink', e.target.value)}
-                                className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1 text-[11px] text-indigo-300 font-mono focus:outline-none transition-all placeholder:text-slate-600"
+                                className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1.5 text-xs text-indigo-300 font-mono focus:outline-none transition-all placeholder:text-slate-650"
                               />
                             </div>
-                            
-                            {(repoItem.techStack || repoItem.period) && (
-                              <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2 border-t border-white/5 text-[10px] font-mono text-slate-500">
-                                <span className="truncate max-w-[200px]">{repoItem.techStack}</span>
-                                <span>{repoItem.period}</span>
-                              </div>
-                            )}
+
+                            <div>
+                              <label className="block text-[9px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                                Technologies Used
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="React, Node.js, Express..."
+                                value={repoItem.techStack || ''}
+                                onChange={(e) => updateProjectCard(repoItem.id, 'techStack', e.target.value)}
+                                className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none transition-all placeholder:text-slate-650"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[9px] font-bold text-slate-500 mb-1 font-mono uppercase">
+                                Project Description
+                              </label>
+                              <textarea
+                                rows={2}
+                                placeholder="Short description of achievements..."
+                                value={repoItem.description || ''}
+                                onChange={(e) => updateProjectCard(repoItem.id, 'description', e.target.value)}
+                                className="w-full bg-slate-900 border border-white/5 hover:border-white/10 focus:border-indigo-500/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-350 focus:outline-none transition-all resize-none placeholder:text-slate-650"
+                              />
+                            </div>
                           </div>
                         ))}
                       </div>
