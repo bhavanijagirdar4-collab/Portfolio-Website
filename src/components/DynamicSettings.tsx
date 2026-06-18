@@ -3,7 +3,7 @@ import { usePortfolio, EducationItem, ResumeProject } from '../context/Portfolio
 import { 
   Settings, X, RotateCcw, Save, Trash2, Plus, 
   User, Github, Award, GraduationCap, CheckCircle, 
-  MapPin, Mail, Phone, Code, BookOpen, Layers, Edit2, Check, Image, Upload
+  MapPin, Mail, Phone, Code, BookOpen, Layers, Edit2, Check, Image, Upload, FileText
 } from 'lucide-react';
 
 export default function DynamicSettings() {

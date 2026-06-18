@@ -9,6 +9,7 @@ import Experience from './components/Experience';
 import Contact from './components/Contact';
 import DynamicSettings from './components/DynamicSettings';
 import AdminLogin from './components/AdminLogin';
+import ResumeModal from './components/ResumeModal';
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 import type { User } from '@supabase/supabase-js';
@@ -27,7 +28,7 @@ function PortfolioAppInner() {
   const [adminUser, setAdminUser] = useState<User | null>(null);
   const [isAdminVerified, setIsAdminVerified] = useState(false);
 
-  const { portfolioData } = usePortfolio();
+  const { portfolioData, isResumeOpen, setIsResumeOpen } = usePortfolio();
   const { personalInfo } = portfolioData;
 
   const isAdminRoute = currentHash === '#admin' || currentHash === '#/admin';
@@ -184,6 +185,8 @@ function PortfolioAppInner() {
       )}
 
       {isAdminRoute && isAdminVerified && adminUser && <DynamicSettings />}
+
+      <ResumeModal isOpen={isResumeOpen} onClose={() => setIsResumeOpen(false)} />
 
       {showScrollTop && (
         <button

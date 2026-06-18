@@ -5,7 +5,7 @@ import { usePortfolio } from '../context/PortfolioContext';
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { portfolioData } = usePortfolio();
+  const { portfolioData, setIsResumeOpen } = usePortfolio();
   const { personalInfo } = portfolioData;
 
   useEffect(() => {
@@ -18,6 +18,10 @@ export default function Header() {
 
   const handleNavClick = (sectionId: string) => {
     setMobileMenuOpen(false);
+    if (sectionId === 'resume') {
+      setIsResumeOpen(true);
+      return;
+    }
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -29,7 +33,7 @@ export default function Header() {
     { id: 'skills', label: 'Skills' },
     { id: 'projects', label: 'Projects' },
     { id: 'experience', label: 'Experience' },
-    { id: 'contact', label: 'Contact' }
+    { id: 'resume', label: 'Resume' }
   ];
 
   return (
@@ -54,12 +58,16 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className="text-sm font-semibold text-slate-100 hover:text-indigo-400 transition-colors cursor-pointer"
+                className={
+                  item.id === 'resume'
+                    ? "text-xs font-bold font-mono tracking-wider uppercase text-white bg-indigo-600/95 hover:bg-indigo-500 px-4 py-2 rounded-xl border border-indigo-500/30 transition-all cursor-pointer shadow-indigo-500/10 shadow-sm hover:shadow-md active:scale-95 shrink-0"
+                    : "text-sm font-semibold text-slate-100 hover:text-indigo-400 transition-colors cursor-pointer shrink-0"
+                }
               >
                 {item.label}
               </button>
@@ -81,12 +89,16 @@ export default function Header() {
 
       {/* Mobile Drawer menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-slate-900 border-b border-white/10 px-4 pt-3 pb-6 space-y-3 shadow-2xl animate-fade-in">
+        <div className="md:hidden bg-slate-900 border-b border-white/10 px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-fade-in">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleNavClick(item.id)}
-              className="block w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className={
+                item.id === 'resume'
+                  ? "block w-full text-center px-4 py-3 rounded-xl text-sm font-mono font-bold uppercase tracking-wider bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md active:scale-95"
+                  : "block w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              }
             >
               {item.label}
             </button>

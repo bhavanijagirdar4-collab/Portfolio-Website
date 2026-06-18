@@ -37,6 +37,8 @@ export interface PortfolioData {
     specialization: string;
     tagline: string;
     avatarUrl?: string;
+    resumeUrl?: string;
+    resumeFileName?: string;
     email: string;
     phone: string;
     location: string;
@@ -67,6 +69,8 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     specialization: "Aspiring Software Engineer",
     tagline: "Turning technical concepts into reliable, production-ready web platforms.",
     avatarUrl: "",
+    resumeUrl: "",
+    resumeFileName: "",
     email: "bhavanijagirdar4@gmail.com",
     phone: "+91 93910 81937",
     location: "Anantapur, Andhra Pradesh, India",
@@ -169,65 +173,158 @@ interface PortfolioContextType {
   portfolioData: PortfolioData;
   updatePortfolioData: (data: PortfolioData) => void;
   resetPortfolioData: () => void;
+  isResumeOpen: boolean;
+  setIsResumeOpen: (open: boolean) => void;
 }
 
 const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'bhavani_portfolio_dynamic_data';
+const DB_NAME = 'ResumeStorageDB';
+const STORE_NAME = 'resumes';
+const DB_VERSION = 1;
+
+function openDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+  });
+}
+
+function saveResumeToDB(dataUrl: string, fileName: string): Promise<void> {
+  return openDB().then((db) => {
+    return new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.put({ dataUrl, fileName }, 'active_resume');
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  });
+}
+
+function getResumeFromDB(): Promise<{ dataUrl: string; fileName: string } | null> {
+  return openDB().then((db) => {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get('active_resume');
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  });
+}
+
+function deleteResumeFromDB(): Promise<void> {
+  return openDB().then((db) => {
+    return new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.delete('active_resume');
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  });
+}
 
 export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [portfolioData, setPortfolioData] = useState<PortfolioData>(DEFAULT_PORTFOLIO_DATA);
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
 
-  // Load from local storage on mount
+  // Load from local storage and IndexedDB on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Deep-merge or check basic structure
+    const loadSavedData = async () => {
+      try {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        let parsed: PortfolioData = stored ? JSON.parse(stored) : { ...DEFAULT_PORTFOLIO_DATA };
+
+        // Attempt to load resume file data from IndexedDB
+        try {
+          const dbResume = await getResumeFromDB();
+          if (dbResume) {
+            parsed.personalInfo.resumeUrl = dbResume.dataUrl;
+            parsed.personalInfo.resumeFileName = dbResume.fileName;
+          } else {
+            parsed.personalInfo.resumeUrl = "";
+            parsed.personalInfo.resumeFileName = "";
+          }
+        } catch (dbErr) {
+          console.error("Failed to load resume from IndexedDB:", dbErr);
+        }
+
+        // Backward compatibility checks
         if (parsed && parsed.personalInfo) {
-          // Backward compatibility check for transitioning from simple key to full list
-          if (!parsed.githubRepos && parsed.githubConfig) {
+          if (!parsed.githubRepos && (parsed as any).githubConfig) {
             parsed.githubRepos = [
               {
                 id: 'repo-default',
-                username: parsed.githubConfig.username || "bhavanijagirdar4-collab",
-                repo: parsed.githubConfig.repo || "Leetcode-Solutions"
+                username: (parsed as any).githubConfig.username || "bhavanijagirdar4-collab",
+                repo: (parsed as any).githubConfig.repo || "Leetcode-Solutions"
               }
             ];
-            delete parsed.githubConfig;
           }
           if (!parsed.githubRepos || parsed.githubRepos.length === 0) {
             parsed.githubRepos = DEFAULT_PORTFOLIO_DATA.githubRepos;
           }
           setPortfolioData(parsed);
         }
+      } catch (e) {
+        console.error("Failed to load custom portfolio details:", e);
       }
-    } catch (e) {
-      console.error("Failed to load custom portfolio details:", e);
-    }
+    };
+
+    loadSavedData();
   }, []);
 
-  const updatePortfolioData = (newData: PortfolioData) => {
+  const updatePortfolioData = async (newData: PortfolioData) => {
     setPortfolioData(newData);
+
+    // Save heavy raw resume file content to IndexedDB
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newData));
+      if (newData.personalInfo.resumeUrl) {
+        await saveResumeToDB(newData.personalInfo.resumeUrl, newData.personalInfo.resumeFileName || "Resume.pdf");
+      } else {
+        await deleteResumeFromDB();
+      }
+    } catch (dbErr) {
+      console.error("Failed to save resume to IndexedDB:", dbErr);
+    }
+
+    // Save lighter-weight metadata to localStorage, stripping base64 to prevent storage quotas limits
+    try {
+      const dataToSave = {
+        ...newData,
+        personalInfo: {
+          ...newData.personalInfo,
+          resumeUrl: "", // Strip heavy base64 value
+          resumeFileName: newData.personalInfo.resumeFileName || ""
+        }
+      };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (e) {
-      console.error("Failed to update custom portfolio details:", e);
+      console.error("Failed to update custom portfolio details in localStorage:", e);
     }
   };
 
-  const resetPortfolioData = () => {
+  const resetPortfolioData = async () => {
     setPortfolioData(DEFAULT_PORTFOLIO_DATA);
     try {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
+      await deleteResumeFromDB();
     } catch (e) {
       console.error("Failed to reset portfolio details:", e);
     }
   };
 
   return (
-    <PortfolioContext.Provider value={{ portfolioData, updatePortfolioData, resetPortfolioData }}>
+    <PortfolioContext.Provider value={{ portfolioData, updatePortfolioData, resetPortfolioData, isResumeOpen, setIsResumeOpen }}>
       {children}
     </PortfolioContext.Provider>
   );
