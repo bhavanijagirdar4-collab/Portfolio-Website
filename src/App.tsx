@@ -33,6 +33,32 @@ function PortfolioAppInner() {
   const isAdminRoute = currentHash === '#admin' || currentHash === '#/admin';
 
   useEffect(() => {
+    // Intercept and swallow network fetch errors globally (e.g., if Supabase is paused or down)
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      if (reason && (
+        reason.message === 'Failed to fetch' || 
+        String(reason).includes('Failed to fetch') ||
+        (reason.status === 0 && reason.name === 'TypeError')
+      )) {
+        console.warn('Caught and suppressed unhandled Supabase/network fetch failure:', reason);
+        event.preventDefault();
+      }
+    };
+
+    const handleError = (event: ErrorEvent) => {
+      if (event.message && (
+        event.message.includes('Failed to fetch') ||
+        event.message.includes('Load failed')
+      )) {
+        console.warn('Caught and suppressed network fetch error:', event.message);
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('unhandledrejection', handleRejection);
+    window.addEventListener('error', handleError);
+
     const handleHashChange = () => {
       setCurrentHash(window.location.hash);
     };
@@ -47,24 +73,28 @@ function PortfolioAppInner() {
     let subscription: any = null;
 
     if (isSupabaseConfigured) {
-      supabase.auth.getUser()
-        .then(({ data: { user } }) => {
-          setAdminUser(user ?? null);
-        })
-        .catch((err) => {
-          console.warn('Supabase authentication state check failed:', err);
+      try {
+        supabase.auth.getUser()
+          .then((res) => {
+            const user = res?.data?.user;
+            setAdminUser(user ?? null);
+          })
+          .catch((err) => {
+            console.warn('Supabase authentication state check failed:', err);
+          });
+
+        const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((_event, session) => {
+          setAdminUser(session?.user ?? null);
+
+          if (!session?.user) {
+            setIsAdminVerified(false);
+          }
         });
-
-      const {
-        data: { subscription: sub },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
-        setAdminUser(session?.user ?? null);
-
-        if (!session?.user) {
-          setIsAdminVerified(false);
-        }
-      });
-      subscription = sub;
+        
+        subscription = sub;
+      } catch (err) {
+        console.warn('Failed to initialize Supabase auth state listeners:', err);
+      }
     } else {
       console.info('Supabase is unconfigured. Running in client-only preview mode.');
       const localVerified = localStorage.getItem('local_admin_verified') === 'true';
@@ -75,9 +105,11 @@ function PortfolioAppInner() {
     }
 
     return () => {
+      window.removeEventListener('unhandledrejection', handleRejection);
+      window.removeEventListener('error', handleError);
       window.removeEventListener('hashchange', handleHashChange);
       window.removeEventListener('scroll', handleScroll);
-      if (subscription) {
+      if (subscription && typeof subscription.unsubscribe === 'function') {
         subscription.unsubscribe();
       }
     };

@@ -36,6 +36,7 @@ export interface PortfolioData {
     title: string;
     specialization: string;
     tagline: string;
+    avatarUrl?: string;
     email: string;
     phone: string;
     location: string;
@@ -65,6 +66,7 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
     title: "Full-Stack Developer",
     specialization: "Aspiring Software Engineer",
     tagline: "Turning technical concepts into reliable, production-ready web platforms.",
+    avatarUrl: "",
     email: "bhavanijagirdar4@gmail.com",
     phone: "+91 93910 81937",
     location: "Anantapur, Andhra Pradesh, India",

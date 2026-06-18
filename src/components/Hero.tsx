@@ -22,7 +22,7 @@ export default function Hero() {
           {/* Profile Picture Holder in the Up-Left Corner */}
           <div className="relative w-40 h-40 rounded-full overflow-hidden border border-white/20 hover:border-indigo-500/50 transition-all duration-300 shadow-2xl bg-slate-900 group">
             <img
-              src={avatarImg}
+              src={personalInfo.avatarUrl && personalInfo.avatarUrl.trim() ? personalInfo.avatarUrl : avatarImg}
               alt={personalInfo.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               referrerPolicy="no-referrer"

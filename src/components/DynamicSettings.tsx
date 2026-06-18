@@ -3,7 +3,7 @@ import { usePortfolio, EducationItem, ResumeProject } from '../context/Portfolio
 import { 
   Settings, X, RotateCcw, Save, Trash2, Plus, 
   User, Github, Award, GraduationCap, CheckCircle, 
-  MapPin, Mail, Phone, Code, BookOpen, Layers, Edit2, Check
+  MapPin, Mail, Phone, Code, BookOpen, Layers, Edit2, Check, Image, Upload
 } from 'lucide-react';
 
 export default function DynamicSettings() {
@@ -54,6 +54,24 @@ export default function DynamicSettings() {
         [key]: value
       }
     }));
+  };
+
+  const handleLocalImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 3 * 1024 * 1024) {
+        alert("For best performance and storage efficiency, please select an image under 3MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result;
+        if (typeof dataUrl === 'string') {
+          updatePersonalInfo('avatarUrl', dataUrl);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const updateSocials = (key: string, value: string) => {
@@ -289,6 +307,143 @@ export default function DynamicSettings() {
                   <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-indigo-400 uppercase tracking-widest border-b border-white/5 pb-2 mb-3">
                     <User size={13} />
                     <span>Personal Metadata</span>
+                  </div>
+
+                  {/* Profile Photo / Avatar editor */}
+                  <div className="p-4 bg-slate-950 border border-white/5 rounded-2xl space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Image size={15} className="text-indigo-400" />
+                      <span className="text-xs font-bold font-mono tracking-wider text-indigo-400 uppercase">
+                        Profile Image / Artwork Settings
+                      </span>
+                    </div>
+
+                    <div className="flex gap-4 items-center">
+                      <div className="relative w-16 h-16 rounded-full overflow-hidden border border-white/25 bg-slate-900 shrink-0">
+                        <img
+                          src={localData.personalInfo.avatarUrl && localData.personalInfo.avatarUrl.trim() ? localData.personalInfo.avatarUrl : "/src/assets/images/developer_avatar_1781419595596.jpg"}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&q=80";
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-550 font-mono uppercase mb-1">
+                            Choose Photo File
+                          </label>
+                          <div className="flex gap-2">
+                            <label className="flex items-center gap-2 cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-[10px] uppercase px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95">
+                              <Upload size={12} />
+                              <span>From Computer</span>
+                              <input
+                                id="local-avatar-file-input"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleLocalImageUpload}
+                                className="hidden"
+                              />
+                            </label>
+                            
+                            {localData.personalInfo.avatarUrl && (
+                              <button
+                                type="button"
+                                onClick={() => updatePersonalInfo('avatarUrl', '')}
+                                className="bg-slate-900 hover:bg-slate-850 text-rose-450 border border-white/5 hover:border-rose-500/20 font-mono font-bold text-[10px] uppercase px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+                              >
+                                Reset Photo
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[9px] font-bold text-slate-600 font-mono uppercase">
+                            Or paste custom image URL
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="https://images.unsplash.com/..."
+                            value={localData.personalInfo.avatarUrl || ''}
+                            onChange={(e) => updatePersonalInfo('avatarUrl', e.target.value)}
+                            className="w-full bg-slate-900 border border-white/10 rounded-xl px-2.5 py-1 text-[11px] text-white font-mono focus:outline-none focus:border-indigo-500 transition-colors placeholder:text-slate-650"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Preselected Creative Presets */}
+                    <div>
+                      <span className="block text-[9px] font-bold text-slate-500 mb-2 font-mono uppercase">
+                        Or select a designer preset artwork
+                      </span>
+                      <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                        {/* Option 1: Original upload */}
+                        <button
+                          type="button"
+                          onClick={() => updatePersonalInfo('avatarUrl', '')}
+                          className={`relative aspect-square rounded-xl overflow-hidden border transition-all cursor-pointer ${
+                            !localData.personalInfo.avatarUrl || localData.personalInfo.avatarUrl.trim() === ''
+                              ? 'border-indigo-500 ring-2 ring-indigo-500/20'
+                              : 'border-white/10 hover:border-white/20'
+                          }`}
+                          title="Original Portrait"
+                        >
+                          <div className="w-full h-full bg-indigo-950 flex flex-col items-center justify-center text-[8px] font-mono font-bold text-indigo-300">
+                            <span>Original</span>
+                            <span className="text-[7px] text-slate-400">Photo</span>
+                          </div>
+                        </button>
+
+                        {[
+                          {
+                            name: "Neon Code",
+                            url: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=250&q=80",
+                          },
+                          {
+                            name: "Minimal Abstract",
+                            url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=250&q=80",
+                          },
+                          {
+                            name: "Vibrant Waves",
+                            url: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=250&q=80",
+                          },
+                          {
+                            name: "Geometry",
+                            url: "https://images.unsplash.com/photo-1618005198143-e5283b519a7f?auto=format&fit=crop&w=250&q=80",
+                          },
+                          {
+                            name: "Cyberpunk Tech",
+                            url: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=250&q=80",
+                          },
+                          {
+                            name: "Minimalist Pastel",
+                            url: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=250&q=80",
+                          }
+                        ].map((preset, index) => (
+                          <button
+                            type="button"
+                            key={index}
+                            onClick={() => updatePersonalInfo('avatarUrl', preset.url)}
+                            className={`relative aspect-square rounded-xl overflow-hidden border transition-all cursor-pointer ${
+                              localData.personalInfo.avatarUrl === preset.url
+                                ? 'border-indigo-500 ring-2 ring-indigo-500/20'
+                                : 'border-white/10 hover:border-white/20'
+                            }`}
+                            title={preset.name}
+                          >
+                            <img
+                              src={preset.url}
+                              alt={preset.name}
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
